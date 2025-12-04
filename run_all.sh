@@ -1,31 +1,28 @@
 #!/bin/bash
 
-rm eval1.txt
-rm eval2.txt
-FILES=/path/to/directory/with/records/*.dat
-for f in $FILES
-do
- f=$(basename $f)
- f=${f%.*}
+trap "echo 'Interrupted'; exit 1" INT
 
- echo $f
- wfdb2mat -r $f #convert to Matlab format
+#clear all asc and qrs files
+rm -f converted_mitbih/*.asc converted_mitbih/*.qrs
+
+#rerun for every file
+record_dir_path="converted_mitbih"
+for f in ${record_dir_path}/*.dat
+do
+    f=$(basename "$f")
+    record_id="${f%.*}"
+    record_path="${record_dir_path}/${record_id}"
+
+    echo "Processing Record: $record_path"
+    samp_rate=$(sampfreq "$record_path")
+    echo "$samp_rate"
+
+    cd "$(dirname "$0")/src" || exit 1
+    octave --no-gui --quiet --eval "Run_Detector(\"../converted_mitbih/$record_id\", $samp_rate, false)"
+    cd ..
 done
 
-#Run algorithm in Matlab. Output should be annotations in text files
-#with WFDB annotator structure. See Matlab frame on the web classroom.
-for f in $FILES
-do
- f=$(basename $f)
- f=${f%.*}
 
- echo $f
- #convert text annotator to WFDB format
- wrann -r $f -a qrs < $f".asc"
- #evaluate using reference annotations atr and your .asc files
- bxb -r $f -a atr qrs -l eval1.txt eval2.txt
-done
-sumstats eval1.txt eval2.txt > results.txt #final statistics
 #Now you can copy average Se and +P from results.txt
 #Columns in results.txt that are of your interest are following:
 # (note that the detector does not distinguish between different
