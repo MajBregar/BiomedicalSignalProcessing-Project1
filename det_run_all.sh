@@ -15,13 +15,11 @@ do
 
     echo "Processing Record: $record_path"
     samp_rate=$(sampfreq "$record_path")
-    echo "$samp_rate"
 
     cd "$(dirname "$0")/src" || exit 1
     octave --no-gui --quiet --eval "Run_Detector(\"../converted_mitbih/$record_id\", $samp_rate, false)"
     cd ..
 done
-
 
 #Now you can copy average Se and +P from results.txt
 #Columns in results.txt that are of your interest are following:
