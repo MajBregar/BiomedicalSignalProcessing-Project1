@@ -1,0 +1,9 @@
+Record Nn' Vn' Fn' On'  Nv   Vv  Fv' Ov' No' Vo' Fo'  Q Se   Q +P   V Se   V +P  V FPR
+ 100  1900   1   0   0   0    0   0   0   1   0   0  99.95 100.00   0.00      -  0.000
+______________________________________________________________________________________
+Sum    1900   1   0   0   0    0   0   0   1   0   0
+Gross                                                   99.95 100.00   0.00      -  0.000
+Average                                                 99.95 100.00   0.00      -  0.000
+Total QRS complexes: 1902  Total VEBs: 1
+
+Summary of results from 1 record
