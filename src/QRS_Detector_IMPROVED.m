@@ -1,4 +1,4 @@
-function [idx] = QRS_Detector(fileName, sampling_rate, plots_enabled)
+function [idx] = QRS_Detector_IMPROVED(fileName, sampling_rate, plots_enabled)
     S = load(fileName);
     MLII_raw = S.val(1, :);
     
@@ -94,6 +94,7 @@ end
 
 
 function [peak_values, peak_indices, classes, mu_QRS_hist, mu_nonQRS_hist] = min_dist_classifier(yb, W, fs)
+    refractory_period_samples = floor(0.1 * fs);
 
     N = length(yb);
     half = floor(W/2);
@@ -110,6 +111,8 @@ function [peak_values, peak_indices, classes, mu_QRS_hist, mu_nonQRS_hist] = min
 
     classes = zeros(1, length(peak_indices));
 
+    last_QRS = -1;
+
     for k = 1:length(peak_indices)
         ind = peak_indices(k);
         pk = peak_values(k);
@@ -117,9 +120,12 @@ function [peak_values, peak_indices, classes, mu_QRS_hist, mu_nonQRS_hist] = min
         d_QRS    = abs(pk - mu_QRS);
         d_nonQRS = abs(pk - mu_nonQRS);
 
-        if d_QRS < d_nonQRS
+
+        RR = ind - last_QRS;
+        if d_QRS < d_nonQRS && (last_QRS == -1 || RR >= refractory_period_samples)
             classes(k) = 1;
             mu_QRS = 0.9 * mu_QRS + 0.1 * pk;
+            last_QRS = ind;
         else
             classes(k) = 0;
             mu_nonQRS = 0.9 * mu_nonQRS + 0.1 * pk;

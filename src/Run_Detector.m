@@ -6,7 +6,7 @@ function Run_Detector( record_path, sampling_rate, output_plots )
     t=cputime();
 
     % run the detector
-    idx = QRS_Detector(record_matlab_file, sampling_rate, output_plots);
+    idx = QRS_Detector_IMPROVED(record_matlab_file, sampling_rate, output_plots);
 
     [~, base, ~] = fileparts(record_path);
     ascii_label_file = sprintf('../converted_mitbih/%s.asc', base);
