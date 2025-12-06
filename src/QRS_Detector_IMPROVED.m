@@ -1,7 +1,7 @@
 function [idx] = QRS_Detector_IMPROVED(fileName, sampling_rate, plots_enabled)
     S = load(fileName);
     MLII_raw = S.val(1, :);
-    
+
     % 1) NOISE FILTER
     K = 5;
     L = 200;
@@ -15,7 +15,7 @@ function [idx] = QRS_Detector_IMPROVED(fileName, sampling_rate, plots_enabled)
 
     N = 20;
     integrated = integrator(squared_energy, N);
-
+    
     % 4) ADAPTIVE MIN DIST CLASSIFIER
     W = 15;
     [peak_values, peak_indices, classes, mu_QRS_hist, mu_nonQRS_hist] = min_dist_classifier(integrated, W, sampling_rate);
@@ -56,10 +56,9 @@ function y = noise_filter(x, K, L)
     y = yK - yL;
 end
 
-    pri
 
 function y = differentiator(x)
-    h = [-1, -2, 0, 2, 1] / 3;
+    h = [-1, 8, 0, -8, 1] / 12;
     y = conv(x, h, 'same');
 end
 
@@ -94,7 +93,7 @@ end
 
 
 function [peak_values, peak_indices, classes, mu_QRS_hist, mu_nonQRS_hist] = min_dist_classifier(yb, W, fs)
-    refractory_period_samples = floor(0.1 * fs);
+    refractory_period_samples = floor(0.2 * fs);
 
     N = length(yb);
     half = floor(W/2);
