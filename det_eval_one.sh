@@ -1,6 +1,6 @@
 #!/bin/bash
 
-record_id="208"
+record_id="${1:-100}"
 
 #clear statistics
 rm -f eval1.txt eval2.txt

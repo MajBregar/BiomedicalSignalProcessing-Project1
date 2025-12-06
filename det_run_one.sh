@@ -1,6 +1,6 @@
 #!/bin/bash
 
-record_id="208"
+record_id="${1:-100}"
 record_path="converted_mitbih/$record_id"
 
 # Sampling rate from header BEFORE cd

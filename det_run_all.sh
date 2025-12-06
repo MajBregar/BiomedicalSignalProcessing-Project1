@@ -21,13 +21,3 @@ do
     cd ..
 done
 
-#Now you can copy average Se and +P from results.txt
-#Columns in results.txt that are of your interest are following:
-# (note that the detector does not distinguish between different
-# types of heart-beats, it just needs to detect them - so it should
-# detect all N, V, F, etc. heart-beats as N, hence, FP=Nn+Vn+Fn,
-# for heartbeat types see:
-# - (Nn+Vn+Fn) = true positive (N, V, or F detected as N)
-# - (No+Vo+Fo) = false negative (failed to detect N, V, or F)
-# - On = false positive (heartbeat was detected where there is none)
-# Now you can calculate Se, +P using formulas from lectures.
