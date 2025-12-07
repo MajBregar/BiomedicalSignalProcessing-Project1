@@ -8,15 +8,8 @@ Processing of ECG signals.
 ## good improvements
 * refractory period - MASSIVE +P improvement
 * better differentiator - SMALL Se improvement
-* double threshold - PT algo thresholding instead of current Massive Se improvement
+* better PT threshold - PT algo thresholding instead of current Massive Se improvement
+* adaptive threshold on peak width - small improvement on +P
+* changing PT threshold coef - allows for selection between Se and +P tradeoff
 
 
-## rejected
-* amplitude normalization (rolling z score) - not good so far
-* classifier adaptability - not good so far
-* smoothing differentiated signal - nope
-
-
-## try
-* slope information - 
-* peak width information (reject wide noised) - 

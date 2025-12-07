@@ -18,30 +18,22 @@ function [idx] = QRS_Detector_IMPROVED(fileName, sampling_rate, plots_enabled)
     
     % 4) ADAPTIVE MIN DIST CLASSIFIER
     W = 15;
-    [peak_values, peak_indices, classes, mu_QRS_hist, mu_nonQRS_hist] = min_dist_classifier(integrated, W, sampling_rate);
-
-    % 5) MINMAX SEARCHER
-    QRS_peaks = peak_indices(classes == 1);
-    [R_locs, S_locs] = minimax_searcher(QRS_peaks, differentiated, MLII_raw);
+    QRS_peaks= min_dist_classifier(integrated, W, sampling_rate);
 
     % DEBUG
     if plots_enabled
-        plot_ms_start = 0000;
-        plot_ms_end = 1000;
+        plot_ms_start = 15000;
+        plot_ms_end = 20000;
         plot_signal_time_domain(MLII_raw,       sampling_rate, plot_ms_start, plot_ms_end, '0_MLII_raw.png');
         plot_signal_time_domain(filtered,       sampling_rate, plot_ms_start, plot_ms_end, '1_filtered_signal.png');
         plot_signal_time_domain(differentiated, sampling_rate, plot_ms_start, plot_ms_end, '2_differentiator.png');
         plot_signal_time_domain(squared_energy, sampling_rate, plot_ms_start, plot_ms_end, '3_squared.png');
         plot_signal_time_domain(integrated,     sampling_rate, plot_ms_start, plot_ms_end, '4_integrated.png');
-        plot_signal_time_domain(peak_values,    sampling_rate, plot_ms_start, plot_ms_end, '5_peak_value.png');
-        plot_signal_time_domain(classes,        sampling_rate, plot_ms_start, plot_ms_end, '6_classes.png');
-        plot_signal_time_domain(mu_QRS_hist,    sampling_rate, plot_ms_start, plot_ms_end, '7_mu_QRS_hist.png');
-        plot_signal_time_domain(mu_nonQRS_hist, sampling_rate, plot_ms_start, plot_ms_end, '8_mu_nonQRS_hist.png');
-        plot_r_peaks_on_raw(MLII_raw, R_locs,   sampling_rate, plot_ms_start, plot_ms_end, '9_detected.png');
+        plot_r_peaks_on_raw(MLII_raw, QRS_peaks,   sampling_rate, plot_ms_start, plot_ms_end, '5_detected.png');
     end
 
     % OUTPUT
-    idx = R_locs;
+    idx = QRS_peaks;
 end
 
 
@@ -73,117 +65,58 @@ function y = integrator(x, N)
 end
 
 
-function [peaks, values] = global_maxima(yb, W)
+function peaks = global_maxima(yb, W)
     half = floor(W/2);
     N = length(yb);
 
     peaks = [];
-    values = [];
-
     for k = half+1 : N-half
         win = yb(k-half : k+half);
         
         if yb(k) == max(win) && sum(win == yb(k)) == 1
             peaks(end+1) = k;
-            values(end+1) = yb(k);
         end
     end
 
 end
 
 
-function [peak_values, peak_indices, classes, SPK_hist, NPK_hist, TH1_hist] = ...
-         min_dist_classifier(yb, W, fs)
-
-    refractory_samples = floor(0.2 * fs);
-
-    [peak_indices, peak_values] = global_maxima(yb, W);
+function QRS_peaks = min_dist_classifier(yb, W, fs)
 
     init_seconds = 2;
+    refractory_period_samples = floor(0.2 * fs);
+    class_separation_coef = 0.15;
+
+    peak_indices = global_maxima(yb, W);
+
     init_seg = yb(1 : min(length(yb), init_seconds*fs));
 
-    SPK = max(init_seg);
-    NPK = mean(init_seg(init_seg < mean(init_seg)));
-    if isnan(NPK), NPK = 0; end
-    TH1 = NPK + 0.25 * (SPK - NPK);
+    QRS = max(init_seg);
+    nQRS = mean(init_seg(init_seg < mean(init_seg)));
+    THR = nQRS + class_separation_coef * (QRS - nQRS);
 
-    SPK_hist = SPK;
-    NPK_hist = NPK;
-    TH1_hist = TH1;
-
-    classes = zeros(1, length(peak_indices));
     last_QRS = -inf;
+    QRS_peaks = [];
 
     for k = 1:length(peak_indices)
 
         ind = peak_indices(k);
-        pk  = peak_values(k);
+        val  = yb(ind);
 
-        is_QRS_candidate = pk > TH1 && (ind - last_QRS) > refractory_samples;
+        is_QRS = val > THR && (ind - last_QRS) > refractory_period_samples;
 
-        if is_QRS_candidate
-            classes(k) = 1;
+        if is_QRS
             last_QRS = ind;
-            SPK = 0.125 * pk + 0.875 * SPK;
+            QRS = 0.125 * val + 0.875 * QRS;
+            QRS_peaks(end+1) = ind;
         else
-            classes(k) = 0;
-            NPK = 0.125 * pk + 0.875 * NPK;
+            nQRS = 0.125 * val + 0.875 * nQRS;
         end
 
-        TH1 = NPK + 0.25 * (SPK - NPK);
+        THR = nQRS + class_separation_coef * (QRS - nQRS);
 
-        SPK_hist(end+1) = SPK;
-        NPK_hist(end+1) = NPK;
-        TH1_hist(end+1) = TH1;
     end
 end
-
-
-
-
-
-
-function [R_locs, S_locs] = minimax_searcher(peak_indices, derivative, raw)
-    R_locs = [];
-    S_locs = [];
-
-    N = length(raw);
-
-    for i = 1:length(peak_indices)
-        p = peak_indices(i);
-
-        % nearest left zero crossing
-        k = p;
-        while k > 2 && sign(derivative(k)) == sign(derivative(k-1))
-            k = k - 1;
-        end
-        left_zc = k;
-
-        % nearest right zero crossing
-        k = p;
-        while k < N-1 && sign(derivative(k)) == sign(derivative(k+1))
-            k = k + 1;
-        end
-        right_zc = k;
-
-        % reject faulty pairs
-        if right_zc <= left_zc
-            continue;
-        end
-
-        % minmax
-        segment = raw(left_zc:right_zc);
-
-        [~, local_max] = max(segment);
-        [~, local_min] = min(segment);
-
-        R_locs(end+1) = left_zc + local_max - 1;
-        S_locs(end+1) = left_zc + local_min - 1;
-    end
-end
-
-
-
 
 
 
