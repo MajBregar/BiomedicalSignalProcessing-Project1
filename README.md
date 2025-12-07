@@ -8,12 +8,13 @@ Processing of ECG signals.
 ## good improvements
 * refractory period - MASSIVE +P improvement
 * better differentiator - SMALL Se improvement
+* double threshold - PT algo thresholding instead of current Massive Se improvement
+
 
 ## rejected
 * amplitude normalization (rolling z score) - not good so far
 * classifier adaptability - not good so far
 * smoothing differentiated signal - nope
-* double threshold - not good so far
 
 
 ## try

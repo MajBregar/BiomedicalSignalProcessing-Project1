@@ -92,46 +92,49 @@ function [peaks, values] = global_maxima(yb, W)
 end
 
 
-function [peak_values, peak_indices, classes, mu_QRS_hist, mu_nonQRS_hist] = min_dist_classifier(yb, W, fs)
-    refractory_period_samples = floor(0.2 * fs);
+function [peak_values, peak_indices, classes, SPK_hist, NPK_hist, TH1_hist] = ...
+         min_dist_classifier(yb, W, fs)
 
-    N = length(yb);
-    half = floor(W/2);
+    refractory_samples = floor(0.2 * fs);
 
     [peak_indices, peak_values] = global_maxima(yb, W);
 
     init_seconds = 2;
-    init_seg = yb(1 : min(N, init_seconds*fs));
-    mu_QRS    = max(init_seg);
-    mu_nonQRS = min(init_seg);
+    init_seg = yb(1 : min(length(yb), init_seconds*fs));
 
-    mu_QRS_hist    = mu_QRS;
-    mu_nonQRS_hist = mu_nonQRS;
+    SPK = max(init_seg);
+    NPK = mean(init_seg(init_seg < mean(init_seg)));
+    if isnan(NPK), NPK = 0; end
+    TH1 = NPK + 0.25 * (SPK - NPK);
+
+    SPK_hist = SPK;
+    NPK_hist = NPK;
+    TH1_hist = TH1;
 
     classes = zeros(1, length(peak_indices));
-
-    last_QRS = -1;
+    last_QRS = -inf;
 
     for k = 1:length(peak_indices)
+
         ind = peak_indices(k);
-        pk = peak_values(k);
-        
-        d_QRS    = abs(pk - mu_QRS);
-        d_nonQRS = abs(pk - mu_nonQRS);
+        pk  = peak_values(k);
 
+        is_QRS_candidate = pk > TH1 && (ind - last_QRS) > refractory_samples;
 
-        RR = ind - last_QRS;
-        if d_QRS < d_nonQRS && (last_QRS == -1 || RR >= refractory_period_samples)
+        if is_QRS_candidate
             classes(k) = 1;
-            mu_QRS = 0.9 * mu_QRS + 0.1 * pk;
             last_QRS = ind;
+            SPK = 0.125 * pk + 0.875 * SPK;
         else
             classes(k) = 0;
-            mu_nonQRS = 0.9 * mu_nonQRS + 0.1 * pk;
+            NPK = 0.125 * pk + 0.875 * NPK;
         end
 
-        mu_QRS_hist(end+1)    = mu_QRS;
-        mu_nonQRS_hist(end+1) = mu_nonQRS;
+        TH1 = NPK + 0.25 * (SPK - NPK);
+
+        SPK_hist(end+1) = SPK;
+        NPK_hist(end+1) = NPK;
+        TH1_hist(end+1) = TH1;
     end
 end
 
