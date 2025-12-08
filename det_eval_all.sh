@@ -2,8 +2,8 @@
 
 rm -f eval1.txt eval2.txt
 
-record_dir_path="converted_mitbih"
-cd converted_mitbih
+record_dir_path="converted_ltst"
+cd converted_ltst
 
 for f in *.asc
 do
