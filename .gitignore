@@ -1,3 +1,7 @@
+converted_ltst/*
+!converted_ltst/*.txt
 
-converted_ltst/
-converted_mitbih/
+converted_mitbih/*
+!converted_mitbih/*.txt
+
+

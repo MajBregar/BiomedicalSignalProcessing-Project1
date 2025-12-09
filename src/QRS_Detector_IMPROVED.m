@@ -22,8 +22,8 @@ function [idx] = QRS_Detector_IMPROVED(fileName, sampling_rate, plots_enabled)
 
     % DEBUG
     if plots_enabled
-        plot_ms_start = 15000;
-        plot_ms_end = 20000;
+        plot_ms_start = 0000;
+        plot_ms_end = 60000;
         plot_signal_time_domain(MLII_raw,       sampling_rate, plot_ms_start, plot_ms_end, '0_MLII_raw.png');
         plot_signal_time_domain(filtered,       sampling_rate, plot_ms_start, plot_ms_end, '1_filtered_signal.png');
         plot_signal_time_domain(differentiated, sampling_rate, plot_ms_start, plot_ms_end, '2_differentiator.png');

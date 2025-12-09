@@ -6,7 +6,7 @@ record_path="$database_dir/$record_id"
 
 # Sampling rate from header BEFORE cd
 samp_rate=$(sampfreq "$record_path")
-output_plots="true"
+output_plots="false"
 
 #run from src folder
 cd "$(dirname "$0")/src" || exit 1
