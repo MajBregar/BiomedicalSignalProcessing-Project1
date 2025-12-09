@@ -1,9 +1,10 @@
 #!/bin/bash
 
+record_dir_path="converted_mitbih"
+
 rm -f eval1.txt eval2.txt
 
-record_dir_path="converted_ltst"
-cd converted_ltst
+cd $record_dir_path
 
 for f in *.asc
 do
@@ -19,8 +20,9 @@ cd ..
 sumstats eval1.txt eval2.txt > eval_benchmark.txt
 rm -f eval1.txt eval2.txt
 
-#Now you can copy average Se and +P from results.txt
-#Columns in results.txt that are of your interest are following:
+#Now you can copy average Se and +P from eval_benchmark.txt
+
+#Columns in eval_benchmark.txt that are of your interest are following:
 # (note that the detector does not distinguish between different
 # types of heart-beats, it just needs to detect them - so it should
 # detect all N, V, F, etc. heart-beats as N, hence, FP=Nn+Vn+Fn,

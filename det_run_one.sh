@@ -2,7 +2,7 @@
 
 record_id="${1:-100}"
 database_dir="${2:-converted_mitbih}"
-record_path="converted_ltst/$record_id"
+record_path="$database_dir/$record_id"
 
 # Sampling rate from header BEFORE cd
 samp_rate=$(sampfreq "$record_path")
