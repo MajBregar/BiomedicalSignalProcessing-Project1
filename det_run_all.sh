@@ -2,10 +2,8 @@
 
 trap "echo 'Interrupted'; exit 1" INT
 
-#clear all asc and qrs files
 rm -f converted_mitbih/*.asc converted_mitbih/*.qrs
 
-#rerun for every file
 record_dir_path="converted_mitbih"
 for f in ${record_dir_path}/*.dat
 do

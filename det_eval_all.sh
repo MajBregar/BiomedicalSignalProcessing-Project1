@@ -1,7 +1,7 @@
 #!/bin/bash
 
 record_dir_path="converted_mitbih"
-qrs_output_dir="mitbit_original_qrs"
+qrs_output_dir="mitbih_original_qrs"
 
 rm -f eval1.txt eval2.txt
 mkdir -p "$qrs_output_dir"
